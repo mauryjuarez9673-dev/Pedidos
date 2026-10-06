@@ -1,7 +1,7 @@
 import { catalogToText, matchesProduct, orderToCsv, orderToTsv, parseCatalog } from "./catalog.js";
 import { DEFAULT_PRODUCTS } from "./catalog-data.js";
 
-const STORAGE = { catalog: "nutrisource.catalog.v2", order: "nutrisource.order.v2" };
+const STORAGE = { catalog: "hills.catalog.v1", order: "hills.order.v1" };
 const state = {
   products: readStorage(STORAGE.catalog, DEFAULT_PRODUCTS),
   order: readStorage(STORAGE.order, {}),
@@ -198,7 +198,7 @@ elements.downloadButton.addEventListener("click", () => {
   const blob = new Blob(["\uFEFF", orderToCsv(state.products, state.order)], { type: "text/csv;charset=utf-8" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = `pedido-nutrisource-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.download = `pedido-hills-${new Date().toISOString().slice(0, 10)}.csv`;
   link.click();
   URL.revokeObjectURL(link.href);
   showToast("Archivo CSV descargado");
