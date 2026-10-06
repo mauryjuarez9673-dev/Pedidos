@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { matchesProduct, orderToCsv, orderToTsv, parseCatalog } from "./catalog.js";
 import { DEFAULT_PRODUCTS } from "./catalog-data.js";
+import { DEFAULT_PRODUCTS as NUTRISOURCE_PRODUCTS } from "./nutrisource/catalog-data.js";
 
 test("includes the complete photographed catalog without duplicate codes", () => {
   assert.equal(DEFAULT_PRODUCTS.length, 119);
@@ -20,10 +21,11 @@ test("reads tab-separated products with Spanish headers", () => {
   assert.deepEqual(products, [{ code: "NS-01", description: "Pollo adulto", presentation: "15 lb", category: "Perros" }]);
 });
 
-test("reads quoted CSV and removes duplicate codes", () => {
+test("reads quoted CSV, removes exact duplicates and preserves reused supplier codes", () => {
   const products = parseCatalog('sku,producto,peso,tipo\nA1,"Salmón, adulto",5 lb,Gatos\nA1,Duplicado,1 lb,Gatos');
-  assert.equal(products.length, 1);
+  assert.equal(products.length, 2);
   assert.equal(products[0].description, "Salmón, adulto");
+  assert.notEqual(products[0].id, products[1].id);
 });
 
 test("search ignores case and accents", () => {
@@ -41,4 +43,28 @@ test("exports only selected products for Excel and CSV", () => {
   assert.match(orderToTsv(products, order), /A1\tUno\t5 lb\t3/);
   assert.doesNotMatch(orderToTsv(products, order), /B2/);
   assert.match(orderToCsv(products, order), /"A1","Uno","5 lb","3"/);
+});
+
+test("exports products with a repeated printed code independently", () => {
+  const products = [
+    { id: "A1::0", code: "A1", description: "Uno", presentation: "4 lb", category: "Perros" },
+    { id: "A1::1", code: "A1", description: "Dos", presentation: "12 lb", category: "Perros" },
+  ];
+  const order = { "A1::1": 2 };
+  const exported = orderToTsv(products, order);
+  assert.doesNotMatch(exported, /Uno/);
+  assert.match(exported, /A1\tDos\t12 lb\t2/);
+});
+
+test("includes all seven photographed NutriSource catalog pages", () => {
+  assert.equal(NUTRISOURCE_PRODUCTS.length, 134);
+  assert.equal(NUTRISOURCE_PRODUCTS.filter((product) => product.category === "Gato").length, 17);
+  assert.equal(NUTRISOURCE_PRODUCTS.filter((product) => product.category === "Húmedo").length, 8);
+  assert.equal(NUTRISOURCE_PRODUCTS.filter((product) => product.category === "Premios").length, 7);
+  assert.equal(NUTRISOURCE_PRODUCTS.filter((product) => product.category === "Tuffy's").length, 3);
+  assert.deepEqual(
+    [...new Set(NUTRISOURCE_PRODUCTS.map((product) => product.code).filter((code, index, codes) => codes.indexOf(code) !== index))].sort(),
+    ["BDD738", "BDD806"],
+  );
+  assert.equal(NUTRISOURCE_PRODUCTS.at(-1).code, "BDC40414");
 });

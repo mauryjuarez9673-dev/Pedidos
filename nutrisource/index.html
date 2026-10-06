@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ffffff" />
-    <title>Concentrado Hills</title>
-    <link rel="stylesheet" href="styles.css" />
+    <title>Concentrado NutriSource</title>
+    <link rel="stylesheet" href="../styles.css" />
   </head>
-  <body data-catalog-module="./catalog-data.js" data-storage-prefix="hills" data-download-prefix="pedido-hills">
+  <body data-catalog-module="./nutrisource/catalog-data.js" data-storage-prefix="nutrisource" data-download-prefix="pedido-nutrisource">
     <header class="topbar">
-      <strong>Concentrado Hills</strong>
+      <strong>Concentrado NutriSource</strong>
       <button class="button button-secondary" id="openCatalogButton" type="button">Editar catálogo</button>
     </header>
 
@@ -18,7 +18,7 @@
         <div class="intro-row">
           <div>
             <h1 id="catalogTitle">Productos</h1>
-            <p>Busca y asigna la cantidad que necesitas.</p>
+            <p>Busca por producto, código o tamaño y asigna la cantidad.</p>
           </div>
           <div class="catalog-count"><strong id="productCount">0</strong><span>productos</span></div>
         </div>
@@ -26,7 +26,7 @@
         <div class="search-row">
           <label class="search-box" for="searchInput">
             <span class="sr-only">Buscar</span>
-            <input id="searchInput" type="search" placeholder="Buscar por código o descripción" autocomplete="off" />
+            <input id="searchInput" type="search" placeholder="Buscar por código, descripción o tamaño" autocomplete="off" />
           </label>
           <select id="categoryFilter" aria-label="Filtrar por categoría">
             <option value="all">Todas las categorías</option>
@@ -40,21 +40,19 @@
 
         <div class="empty-state" id="emptyState">
           <h2>No hay productos cargados</h2>
-          <p>Carga el catálogo de Hills para comenzar.</p>
+          <p>Carga el catálogo de NutriSource para comenzar.</p>
           <button class="button button-primary" id="emptyCatalogButton" type="button">Cargar catálogo</button>
         </div>
 
         <div class="no-results" id="noResults" hidden>
           <strong>No encontramos coincidencias</strong>
-          <span>Prueba con otro nombre, código o categoría.</span>
+          <span>Prueba con otro nombre, código, tamaño o categoría.</span>
         </div>
       </section>
 
       <aside class="order-panel" aria-labelledby="orderTitle">
         <div class="order-heading">
-          <div>
-            <h2 id="orderTitle">Pedido</h2>
-          </div>
+          <h2 id="orderTitle">Pedido</h2>
           <span class="selection-badge" id="selectionBadge">0</span>
         </div>
 
@@ -69,9 +67,7 @@
             <div><span>Productos distintos</span><strong id="lineTotal">0</strong></div>
             <div><span>Unidades totales</span><strong id="unitTotal">0</strong></div>
           </div>
-          <button class="button button-accent" id="copyButton" type="button" disabled>
-            Copiar para Excel
-          </button>
+          <button class="button button-accent" id="copyButton" type="button" disabled>Copiar para Excel</button>
           <div class="footer-actions">
             <button class="text-button" id="downloadButton" type="button" disabled>Descargar CSV</button>
             <button class="text-button danger" id="clearOrderButton" type="button" disabled>Vaciar pedido</button>
@@ -89,17 +85,13 @@
           </div>
           <button class="icon-button" value="cancel" aria-label="Cerrar" formnovalidate>×</button>
         </div>
-
         <div class="format-hint">
           <span>Formato recomendado</span>
           <code>Código&nbsp;&nbsp; Descripción&nbsp;&nbsp; Presentación&nbsp;&nbsp; Categoría</code>
         </div>
-
         <label class="textarea-label" for="catalogText">Pega aquí tu listado</label>
-        <textarea id="catalogText" rows="10" placeholder="NS-001&#9;Alimento para perro adulto&#9;15 lb&#9;Perros
-NS-002&#9;Alimento para gato adulto&#9;6.6 lb&#9;Gatos"></textarea>
+        <textarea id="catalogText" rows="10" placeholder="Código&#9;Descripción&#9;Presentación&#9;Categoría"></textarea>
         <p class="parse-message" id="parseMessage">Puedes pegar datos separados por tabulaciones, punto y coma o comas.</p>
-
         <div class="dialog-actions">
           <button class="button button-secondary" value="cancel" type="submit">Cancelar</button>
           <button class="button button-primary" id="saveCatalogButton" value="default" type="submit">Guardar catálogo</button>
@@ -108,7 +100,6 @@ NS-002&#9;Alimento para gato adulto&#9;6.6 lb&#9;Gatos"></textarea>
     </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-    <script type="module" src="app.js"></script>
+    <script type="module" src="../app.js"></script>
   </body>
 </html>

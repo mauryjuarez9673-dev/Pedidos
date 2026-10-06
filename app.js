@@ -1,7 +1,10 @@
 import { catalogToText, matchesProduct, orderToCsv, orderToTsv, parseCatalog } from "./catalog.js";
-import { DEFAULT_PRODUCTS } from "./catalog-data.js";
 
-const STORAGE = { catalog: "hills.catalog.v1", order: "hills.order.v1" };
+const catalogModule = document.body.dataset.catalogModule || "./catalog-data.js";
+const storagePrefix = document.body.dataset.storagePrefix || "pedidos";
+const downloadPrefix = document.body.dataset.downloadPrefix || "pedido";
+const { DEFAULT_PRODUCTS } = await import(catalogModule);
+const STORAGE = { catalog: `${storagePrefix}.catalog.v1`, order: `${storagePrefix}.order.v1` };
 const state = {
   products: readStorage(STORAGE.catalog, DEFAULT_PRODUCTS),
   order: readStorage(STORAGE.order, {}),
@@ -47,10 +50,15 @@ function escapeHtml(value) {
   })[character]);
 }
 
+function productKey(product) {
+  return product.id || product.code;
+}
+
 function productCard(product) {
-  const quantity = state.order[product.code] || 0;
+  const key = productKey(product);
+  const quantity = state.order[key] || 0;
   return `
-    <article class="product-row ${quantity ? "in-order" : ""}" data-code="${escapeHtml(product.code)}">
+    <article class="product-row ${quantity ? "in-order" : ""}" data-code="${escapeHtml(key)}">
       <span class="product-code">${escapeHtml(product.code)}</span>
       <div class="product-info">
         <p class="product-name">${escapeHtml(product.description)}</p>
@@ -78,9 +86,10 @@ function renderCatalog() {
 }
 
 function orderItem(product) {
-  const quantity = state.order[product.code];
+  const key = productKey(product);
+  const quantity = state.order[key];
   return `
-    <div class="order-item" data-code="${escapeHtml(product.code)}">
+    <div class="order-item" data-code="${escapeHtml(key)}">
       <div>
         <span class="code">${escapeHtml(product.code)}</span>
         <span class="order-item-name">${escapeHtml(product.description)}</span>
@@ -96,8 +105,8 @@ function orderItem(product) {
 }
 
 function renderOrder() {
-  const selected = state.products.filter((product) => (state.order[product.code] || 0) > 0);
-  const units = selected.reduce((total, product) => total + state.order[product.code], 0);
+  const selected = state.products.filter((product) => (state.order[productKey(product)] || 0) > 0);
+  const units = selected.reduce((total, product) => total + state.order[productKey(product)], 0);
   elements.orderItems.innerHTML = selected.map(orderItem).join("");
   elements.orderEmpty.hidden = selected.length > 0;
   elements.orderItems.hidden = selected.length === 0;
@@ -176,7 +185,7 @@ elements.catalogForm.addEventListener("submit", (event) => {
     return;
   }
   state.products = products;
-  const validCodes = new Set(products.map((product) => product.code));
+  const validCodes = new Set(products.map(productKey));
   state.order = Object.fromEntries(Object.entries(state.order).filter(([code]) => validCodes.has(code)));
   state.category = "all";
   saveState();
@@ -198,7 +207,7 @@ elements.downloadButton.addEventListener("click", () => {
   const blob = new Blob(["\uFEFF", orderToCsv(state.products, state.order)], { type: "text/csv;charset=utf-8" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = `pedido-hills-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.download = `${downloadPrefix}-${new Date().toISOString().slice(0, 10)}.csv`;
   link.click();
   URL.revokeObjectURL(link.href);
   showToast("Archivo CSV descargado");

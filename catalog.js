@@ -64,7 +64,7 @@ export function parseCatalog(text) {
     ? { code: detected.code ?? 0, description: detected.description ?? 1, presentation: detected.presentation ?? 2, category: detected.category ?? 3 }
     : { code: 0, description: 1, presentation: 2, category: 3 };
 
-  return rows.slice(hasHeader ? 1 : 0)
+  const products = rows.slice(hasHeader ? 1 : 0)
     .map((cells) => ({
       code: cells[indexes.code]?.trim() || "",
       description: cells[indexes.description]?.trim() || "",
@@ -72,7 +72,21 @@ export function parseCatalog(text) {
       category: cells[indexes.category]?.trim() || "Sin categoría",
     }))
     .filter((product) => product.code && product.description)
-    .filter((product, index, products) => products.findIndex((item) => normalize(item.code) === normalize(product.code)) === index);
+    .filter((product, index, allProducts) => allProducts.findIndex((item) =>
+      normalize(`${item.code}\t${item.description}\t${item.presentation}`) ===
+      normalize(`${product.code}\t${product.description}\t${product.presentation}`)
+    ) === index);
+
+  const repeatedCodes = new Set(
+    products
+      .map((product) => normalize(product.code))
+      .filter((code, index, codes) => codes.indexOf(code) !== index),
+  );
+
+  return products.map((product, index) => ({
+    ...product,
+    ...(repeatedCodes.has(normalize(product.code)) ? { id: `${product.code}::${index}` } : {}),
+  }));
 }
 
 export function catalogToText(products) {
@@ -83,10 +97,11 @@ export function catalogToText(products) {
 }
 
 export function orderToTsv(products, order) {
-  const selected = products.filter((product) => (order[product.code] || 0) > 0);
+  const productKey = (product) => product.id || product.code;
+  const selected = products.filter((product) => (order[productKey(product)] || 0) > 0);
   return [
     ["Código", "Descripción", "Presentación", "Cantidad"],
-    ...selected.map((product) => [product.code, product.description, product.presentation, order[product.code]]),
+    ...selected.map((product) => [product.code, product.description, product.presentation, order[productKey(product)]]),
   ].map((row) => row.join("\t")).join("\n");
 }
 

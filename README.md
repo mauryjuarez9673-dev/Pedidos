@@ -1,6 +1,11 @@
-# Concentrado Hills
+# Pedidos Hills y NutriSource
 
-Aplicación web local para buscar productos Hills, seleccionar cantidades y copiar el pedido a Excel o descargarlo como CSV. Incluye precargados los 119 productos transcritos del catálogo fotografiado de Hills.
+Aplicaciones web para buscar productos, seleccionar cantidades y copiar el pedido a Excel o descargarlo como CSV.
+
+- Hills: `http://localhost:4173/`, con 119 productos.
+- NutriSource: `http://localhost:4173/nutrisource/`, con 134 productos transcritos de las siete fotografías del catálogo.
+
+Los pedidos de ambas marcas se guardan por separado en el navegador.
 
 ## Ejecutar
 
